@@ -22,9 +22,11 @@
 #include "smbios_c/compat.h"
 
 // system
-#ifdef sun
 #include <sys/sysi86.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <errno.h>
+
 void outb_p(int data, int port)
 {
 	__asm__ __volatile__("outb %b0,%w1" : : "a" (data), "Nd" (port));
@@ -39,11 +41,6 @@ int iopl(int v)
 {
   return sysi86(SI86V86, V86SC_IOPL, 0x3000);
 }
-#else
-#include <sys/io.h>
-#endif
-#include <stdlib.h>
-#include <errno.h>
 
 // public
 #include "smbios_c/cmos.h"

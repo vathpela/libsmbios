@@ -82,6 +82,11 @@ struct smbios_table
     char *errstring;
 };
 
+#ifdef sun
+#undef __internal
+#define __internal
+#endif
+
 int __internal init_smbios_struct(struct smbios_table *m);
 void __internal _smbios_table_free(struct smbios_table *this);
 void __internal do_smbios_fixups(struct smbios_table *);

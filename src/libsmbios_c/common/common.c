@@ -34,3 +34,9 @@ void fixed_strerror(int errval, char *errbuf, size_t bufsize)
 }
 #endif
 
+#ifdef sun
+void fixed_strerror(int errval, char *errbuf, size_t bufsize)
+{
+  printf("fixed_strerror: %d\n", errval);
+}
+#endif

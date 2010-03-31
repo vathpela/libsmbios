@@ -1,5 +1,6 @@
-// vim:expandtab:autoindent:tabstop=4:shiftwidth=4:filetype=c:
-/*
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+ * vim:expandtab:autoindent:tabstop=4:shiftwidth=4:filetype=c:cindent:textwidth=0:
+ *
  * Copyright (C) 2005 Dell Inc.
  *  by Michael Brown <Michael_E_Brown@dell.com>
  * Licensed under the Open Software License version 2.1
@@ -15,25 +16,14 @@
  * See the GNU General Public License for more details.
  */
 
-#ifndef C_SYSINFO_H
-#define C_SYSINFO_H
+#define LIBSMBIOS_C_SOURCE
 
-#undef DEBUG_MODULE_NAME
-#define DEBUG_MODULE_NAME "DEBUG_SYSINFO_C"
+// Include compat.h first, then system headers, then public, then private
+#include "smbios_c/compat.h"
 
-#define MAX_SMI_TAG_SIZE 12
-#define ERROR_BUFSIZE 1024
+// system
 
-#ifdef sun
-#undef __internal
-#define __internal
-#endif
-
-__internal void sysinfo_clearerr();
-__internal char *sysinfo_get_module_error_buf();
-__internal char * smbios_struct_get_string_from_table(u8 type, u8 offset);
-__internal void strip_trailing_whitespace( char *str );
-__internal char *getTagFromSMI(u16 select);
-__internal u32 setTagUsingSMI(u16 select, const char *, u16);
-
-#endif
+// footer
+#include "smbios_c/memory.h"
+#include "smbios_c/types.h"
+#include "smbios_impl.h"
