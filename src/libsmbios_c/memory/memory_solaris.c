@@ -38,7 +38,7 @@
 // usually want to include this last
 #include "libsmbios_c_intlize.h"
 
-struct linux_data
+struct solaris_data
 {
     char *filename;
     FILE *fd;
@@ -52,7 +52,7 @@ struct linux_data
 #define READ_MMAP 0
 #define WRITE_MMAP 1
 
-static void closefds(struct linux_data *private_data)
+static void closefds(struct solaris_data *private_data)
 {
     fnprintf("\n");
     if (private_data->lastMapping)
@@ -70,7 +70,7 @@ static void closefds(struct linux_data *private_data)
     private_data->fd = 0;
 }
 
-static FILE * reopen(struct linux_data *private_data, int rw)
+static FILE * reopen(struct solaris_data *private_data, int rw)
 {
     char *openMode = rw ? "r+b": "rb";
     fnprintf(" file: %s,  rw: %d\n", private_data->filename, rw );
@@ -99,7 +99,7 @@ static void debug_dump_buffer(const char *fn, const char *s, const u8 *buffer, s
 #define debug_dump_buffer(...) do {} while(0)
 #endif
 
-static void remap(struct linux_data *private_data, u64 offset, bool rw)
+static void remap(struct solaris_data *private_data, u64 offset, bool rw)
 {
     int flags = rw ? PROT_WRITE : PROT_READ;
     off_t mmoff = offset % private_data->mappingSize;
@@ -126,7 +126,7 @@ out:
     return;
 }
 
-static size_t trycopy(struct linux_data *private_data, u8 *buffer, u64 offset, size_t length, bool rw)
+static size_t trycopy(struct solaris_data *private_data, u8 *buffer, u64 offset, size_t length, bool rw)
 {
     off_t mmoff = offset % private_data->mappingSize;
 
@@ -151,7 +151,7 @@ static size_t trycopy(struct linux_data *private_data, u8 *buffer, u64 offset, s
 
 static int copy_mmap(const struct memory_access_obj *this, u8 *buffer, u64 offset, size_t length, bool rw)
 {
-    struct linux_data *private_data = (struct linux_data *)this->private_data;
+    struct solaris_data *private_data = (struct solaris_data *)this->private_data;
     private_data->mem_errno = errno = 0;
     int retval = -1;
     const char *error = 0;
@@ -209,19 +209,19 @@ out:
     return retval;
 }
 
-static int linux_read_fn(const struct memory_access_obj *this, u8 *buffer, u64 offset, size_t length)
+static int solaris_read_fn(const struct memory_access_obj *this, u8 *buffer, u64 offset, size_t length)
 {
     return copy_mmap(this, buffer, offset, length, READ_MMAP);
 }
 
-static int linux_write_fn(const struct memory_access_obj *this, u8 *buffer, u64 offset, size_t length)
+static int solaris_write_fn(const struct memory_access_obj *this, u8 *buffer, u64 offset, size_t length)
 {
     return copy_mmap(this, buffer, offset, length, WRITE_MMAP);
 }
 
-static void linux_cleanup(struct memory_access_obj *this)
+static void solaris_cleanup(struct memory_access_obj *this)
 {
-    struct linux_data *private_data = (struct linux_data *)this->private_data;
+    struct solaris_data *private_data = (struct solaris_data *)this->private_data;
     fnprintf(" memory\n");
 
     closefds(private_data);
@@ -230,9 +230,9 @@ static void linux_cleanup(struct memory_access_obj *this)
     private_data->rw = 0;
 }
 
-static void linux_free(struct memory_access_obj *this)
+static void solaris_free(struct memory_access_obj *this)
 {
-    struct linux_data *private_data = (struct linux_data *)this->private_data;
+    struct solaris_data *private_data = (struct solaris_data *)this->private_data;
     fnprintf("\n");
 
     free(this->errstring);
@@ -247,7 +247,7 @@ static void linux_free(struct memory_access_obj *this)
     this->initialized=0;
 }
 
-__hidden int init_mem_struct_filename(struct memory_access_obj *m, const char *fn)
+__internal int init_mem_struct_filename(struct memory_access_obj *m, const char *fn)
 {
     char *errbuf=0;
     int retval = 0;
@@ -257,7 +257,7 @@ __hidden int init_mem_struct_filename(struct memory_access_obj *m, const char *f
 
     // do allocations
     error = _("There was an allocation failure while trying to construct the memory object. Filename: ");
-    struct linux_data *private_data = calloc(1, sizeof(struct linux_data));
+    struct solaris_data *private_data = calloc(1, sizeof(struct solaris_data));
     private_data->filename = calloc(1, strlen(fn) + 1);
     m->errstring = calloc(1, ERROR_BUFSIZE);
     if (!private_data || !private_data->filename || !m->errstring)
@@ -269,10 +269,10 @@ __hidden int init_mem_struct_filename(struct memory_access_obj *m, const char *f
     private_data->mappingSize = getpagesize(); // must be power of 2, >= getpagesize()
     m->private_data = private_data;
 
-    m->free = linux_free;
-    m->read_fn = linux_read_fn;
-    m->write_fn = linux_write_fn;
-    m->cleanup = linux_cleanup;
+    m->free = solaris_free;
+    m->read_fn = solaris_read_fn;
+    m->write_fn = solaris_write_fn;
+    m->cleanup = solaris_cleanup;
     m->close = 1;
 
     error = _("File open error during memory object construction. The filename: ");
@@ -294,7 +294,7 @@ out_fail:
         fixed_strerror(errno, errbuf, ERROR_BUFSIZE);
     }
     fnprintf(" errbuf ->%p (%zd) '%s'\n", errbuf, strlen(errbuf), errbuf);
-    linux_free(m);
+    solaris_free(m);
     retval = -1;
 
 out:
@@ -302,13 +302,9 @@ out:
     return retval;
 }
 
-__hidden int init_mem_struct(struct memory_access_obj *m)
+__internal int init_mem_struct(struct memory_access_obj *m)
 {
-#ifdef sun
    return init_mem_struct_filename(m, "/dev/xsvc");
-#else
-   return init_mem_struct_filename(m, "/dev/mem");
-#endif
 }
 
 

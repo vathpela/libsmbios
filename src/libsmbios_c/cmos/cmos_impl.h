@@ -50,6 +50,11 @@ struct cmos_access_obj
     int write_lock;
 };
 
+#ifdef sun
+#undef __internal
+#define __internal
+#endif
+
 // regular one
 __hidden int init_cmos_struct(struct cmos_access_obj *m);
 __hidden int _init_cmos_std_stuff(struct cmos_access_obj *m);  // base class constructor
