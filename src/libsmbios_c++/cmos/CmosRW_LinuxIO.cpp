@@ -20,25 +20,7 @@
 #define LIBSMBIOS_SOURCE
 #include "smbios/compat.h"
 
-#ifdef sun
-#include <sys/sysi86.h>
-void outb_p(int data, int port)
-{
-	__asm__ __volatile__("outb %b0,%w1" : : "a" (data), "Nd" (port));
-}
-uint8_t inb_p(int port)
-{
-	uint8_t v;
-	__asm__ __volatile__("inb %w1,%b0" : "=a" (v) : "d" (port));
-	return v;
-}
-int iopl(int v)
-{
-  return sysi86(SI86V86, V86SC_IOPL, 0x3000);
-}
-#else
 #include <sys/io.h>
-#endif
 
 #include "CmosRWImpl.h"
 

@@ -36,7 +36,7 @@ using namespace factory;
 
 namespace memory
 {
-    struct LinuxData
+    struct SolarisData
     {
         FILE *fd;
         void *lastMapping;
@@ -46,7 +46,7 @@ namespace memory
         string filename;
     };
 
-    static void condOpenFd(struct LinuxData *data)
+    static void condOpenFd(struct SolarisData *data)
     {
         if(!data->fd)
         {
@@ -64,7 +64,7 @@ namespace memory
         }
     }
 
-    static void closeFd(struct LinuxData *data)
+    static void closeFd(struct SolarisData *data)
     {
         if(data->lastMapping)
         {
@@ -81,17 +81,13 @@ namespace memory
 
     MemoryFactoryImpl::MemoryFactoryImpl()
     {
-#ifdef sun
         setParameter("memFile", "/dev/xsvc");
-#else
-        setParameter("memFile", "/dev/mem");
-#endif
     }
 
     MemoryOsSpecific::MemoryOsSpecific( const string filename )
             : IMemory()
     {
-        LinuxData *data = new LinuxData();
+        SolarisData *data = new SolarisData();
         data->fd = 0;
         data->filename = filename;
         data->mappingSize = getpagesize() * 16;
@@ -103,7 +99,7 @@ namespace memory
 
     MemoryOsSpecific::~MemoryOsSpecific()
     {
-        LinuxData *data = static_cast<LinuxData *>(osData);
+        SolarisData *data = static_cast<SolarisData *>(osData);
         closeFd(data);
         delete data;
         osData = 0;
@@ -111,18 +107,18 @@ namespace memory
 
     int MemoryOsSpecific::incReopenHint()
     {
-        LinuxData *data = static_cast<LinuxData *>(osData);
+        SolarisData *data = static_cast<SolarisData *>(osData);
         return ++(data->reopenHint);
     }
     int MemoryOsSpecific::decReopenHint()
     {
-        LinuxData *data = static_cast<LinuxData *>(osData);
+        SolarisData *data = static_cast<SolarisData *>(osData);
         return --(data->reopenHint);
     }
 
     void MemoryOsSpecific::fillBuffer( u8 *buffer, u64 offset, unsigned int length) const
     {
-        LinuxData *data = static_cast<LinuxData *>(osData);
+        SolarisData *data = static_cast<SolarisData *>(osData);
         unsigned int bytesCopied = 0;
 
         condOpenFd(data);
@@ -136,11 +132,7 @@ namespace memory
                 data->lastMappedOffset = offset-mmoff;
                 if (data->lastMapping)
                     munmap(data->lastMapping, data->mappingSize);
-#ifdef sun
                 data->lastMapping = mmap( 0, data->mappingSize, PROT_READ, MAP_SHARED, fileno(data->fd), offset-mmoff);
-#else
-                data->lastMapping = mmap( 0, data->mappingSize, PROT_READ, MAP_PRIVATE, fileno(data->fd), offset-mmoff);
-#endif
                 if ((data->lastMapping) == reinterpret_cast<void *>(-1))
                     throw AccessErrorImpl(_("mmap failed."));
             }
@@ -168,7 +160,7 @@ namespace memory
 
     void MemoryOsSpecific::putByte( u64 offset, u8 value ) const
     {
-        LinuxData *data = static_cast<LinuxData *>(osData);
+        SolarisData *data = static_cast<SolarisData *>(osData);
         condOpenFd(data);
         int ret = fseek( data->fd, offset, 0 );
         if( 0 != ret )

@@ -81,11 +81,7 @@ namespace memory
 
     MemoryFactoryImpl::MemoryFactoryImpl()
     {
-#ifdef sun
-        setParameter("memFile", "/dev/xsvc");
-#else
         setParameter("memFile", "/dev/mem");
-#endif
     }
 
     MemoryOsSpecific::MemoryOsSpecific( const string filename )
@@ -136,11 +132,7 @@ namespace memory
                 data->lastMappedOffset = offset-mmoff;
                 if (data->lastMapping)
                     munmap(data->lastMapping, data->mappingSize);
-#ifdef sun
-                data->lastMapping = mmap( 0, data->mappingSize, PROT_READ, MAP_SHARED, fileno(data->fd), offset-mmoff);
-#else
                 data->lastMapping = mmap( 0, data->mappingSize, PROT_READ, MAP_PRIVATE, fileno(data->fd), offset-mmoff);
-#endif
                 if ((data->lastMapping) == reinterpret_cast<void *>(-1))
                     throw AccessErrorImpl(_("mmap failed."));
             }

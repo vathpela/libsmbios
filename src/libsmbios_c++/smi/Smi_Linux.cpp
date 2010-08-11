@@ -45,10 +45,6 @@ struct smiLinuxPrivateData
 
 namespace smi
 {
-#ifdef sun
-#undef FWRITE
-#endif
-
     static size_t FWRITE(const void *ptr, size_t size, size_t nmemb, FILE *stream)
     {
         size_t written = fwrite(ptr, size, nmemb, stream); 
@@ -91,9 +87,7 @@ namespace smi
         if( ! tmpPrivPtr->fh_doReq)
             throw smbios::InternalErrorImpl("Could not open file " SMI_DO_REQUEST_FILE ". Check that dcdbas driver is properly loaded.");
 
-#ifndef sun
         flock( fileno(tmpPrivPtr->fh_data), LOCK_EX );
-#endif
 
         fseek(tmpPrivPtr->fh_doReq, 0L, 0);
         FWRITE("0", 1, 1, tmpPrivPtr->fh_doReq);
@@ -171,9 +165,7 @@ namespace smi
     void SmiArchStrategy::finish()
     {
         smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
-#ifndef sun
         flock( fileno(tmpPrivPtr->fh_data), LOCK_UN );
-#endif
         fclose(tmpPrivPtr->fh_doReq);
         fclose(tmpPrivPtr->fh_data);
 

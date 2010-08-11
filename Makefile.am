@@ -21,9 +21,17 @@ AM_CPPFLAGS = -I$(top_builddir)/out/include -I$(top_srcdir)/src/include -DLIBSMB
 AM_CFLAGS = -Werror -Wall
 AM_CXXFLAGS = -Werror -Wall
 AM_LDADD = $(LIBINTL)
+
+if BUILD_LINUX
 AM_LDFLAGS = -L$(top_builddir)/out/ -Wl,--no-undefined @LDFLAG_AS_NEEDED@
+endif
+
+if BUILD_SOLARIS
+AM_LDFLAGS = -L$(top_builddir)/out/
+endif
 
 if BUILD_WINDOWS
+AM_LDFLAGS = -L$(top_builddir)/out/ -Wl,--no-undefined @LDFLAG_AS_NEEDED@
 AM_LDFLAGS += -Wl,--avoid-version -Wl,--enable-auto-import
 endif
 
