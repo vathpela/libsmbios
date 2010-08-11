@@ -37,7 +37,7 @@ using namespace std;
 //#define SMI_PHYS_ADDR_FILE  "/tmp/smi_data_buf_phys_addr"
 //#define SMI_DO_REQUEST_FILE "/tmp/smi_request"
 
-struct smiLinuxPrivateData
+struct smiSolarisPrivateData
 {
     FILE *fh_data;
     FILE *fh_doReq;
@@ -45,9 +45,7 @@ struct smiLinuxPrivateData
 
 namespace smi
 {
-#ifdef sun
 #undef FWRITE
-#endif
 
     static size_t FWRITE(const void *ptr, size_t size, size_t nmemb, FILE *stream)
     {
@@ -60,13 +58,13 @@ namespace smi
 
     SmiArchStrategy::SmiArchStrategy()
     {
-        privateData = new smiLinuxPrivateData;
-        memset(privateData, 0, sizeof(smiLinuxPrivateData));
+        privateData = new smiSolarisPrivateData;
+        memset(privateData, 0, sizeof(smiSolarisPrivateData));
     }
 
     SmiArchStrategy::~SmiArchStrategy()
     {
-        smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
+        smiSolarisPrivateData *tmpPrivPtr = reinterpret_cast<smiSolarisPrivateData *>(privateData);
 
         if(tmpPrivPtr->fh_data)
             fclose(tmpPrivPtr->fh_data);
@@ -80,7 +78,7 @@ namespace smi
 
     void SmiArchStrategy::lock()
     {
-        smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
+        smiSolarisPrivateData *tmpPrivPtr = reinterpret_cast<smiSolarisPrivateData *>(privateData);
 
 
         tmpPrivPtr->fh_data = fopen(SMI_DATA_FILE, "r+b");
@@ -90,10 +88,6 @@ namespace smi
         tmpPrivPtr->fh_doReq = fopen(SMI_DO_REQUEST_FILE, "wb");
         if( ! tmpPrivPtr->fh_doReq)
             throw smbios::InternalErrorImpl("Could not open file " SMI_DO_REQUEST_FILE ". Check that dcdbas driver is properly loaded.");
-
-#ifndef sun
-        flock( fileno(tmpPrivPtr->fh_data), LOCK_EX );
-#endif
 
         fseek(tmpPrivPtr->fh_doReq, 0L, 0);
         FWRITE("0", 1, 1, tmpPrivPtr->fh_doReq);
@@ -145,13 +139,13 @@ namespace smi
 
     void SmiArchStrategy::addInputBuffer(u8 *buffer, size_t size)
     {
-        smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
+        smiSolarisPrivateData *tmpPrivPtr = reinterpret_cast<smiSolarisPrivateData *>(privateData);
         FWRITE(buffer,  1,  size,  tmpPrivPtr->fh_data);
     }
 
     void SmiArchStrategy::getResultBuffer(u8 *buffer, size_t size)
     {
-        smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
+        smiSolarisPrivateData *tmpPrivPtr = reinterpret_cast<smiSolarisPrivateData *>(privateData);
         fflush(NULL);
         int numbytes = fread(buffer,  1,  size,  tmpPrivPtr->fh_data);
         if (!numbytes)
@@ -161,7 +155,7 @@ namespace smi
 
     void SmiArchStrategy::execute()
     {
-        smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
+        smiSolarisPrivateData *tmpPrivPtr = reinterpret_cast<smiSolarisPrivateData *>(privateData);
         fflush(NULL);
         FWRITE("1", 1, 1, tmpPrivPtr->fh_doReq);
         fflush(NULL);
@@ -170,10 +164,7 @@ namespace smi
 
     void SmiArchStrategy::finish()
     {
-        smiLinuxPrivateData *tmpPrivPtr = reinterpret_cast<smiLinuxPrivateData *>(privateData);
-#ifndef sun
-        flock( fileno(tmpPrivPtr->fh_data), LOCK_UN );
-#endif
+        smiSolarisPrivateData *tmpPrivPtr = reinterpret_cast<smiSolarisPrivateData *>(privateData);
         fclose(tmpPrivPtr->fh_doReq);
         fclose(tmpPrivPtr->fh_data);
 

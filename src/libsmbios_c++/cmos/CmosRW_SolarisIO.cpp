@@ -20,7 +20,6 @@
 #define LIBSMBIOS_SOURCE
 #include "smbios/compat.h"
 
-#ifdef sun
 #include <sys/sysi86.h>
 void outb_p(int data, int port)
 {
@@ -36,9 +35,6 @@ int iopl(int v)
 {
   return sysi86(SI86V86, V86SC_IOPL, 0x3000);
 }
-#else
-#include <sys/io.h>
-#endif
 
 #include "CmosRWImpl.h"
 

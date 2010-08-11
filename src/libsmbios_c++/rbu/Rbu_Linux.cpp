@@ -37,43 +37,6 @@
 // always include last if included.
 #include "smbios/message.h"  // not needed outside of this lib. (mainly for gettext i18n)
 
-#ifdef sun
-#include <fcntl.h>
-#include <sys/mman.h>
-#define XSVCIOC 		('Q' << 8)
-#define XSVC_ALLOC_MEM 		(XSVCIOC | 130)
-
-#ifdef _LP64
-typedef struct _xsvc_mem_req {
-	int		xsvc_mem_reqid;
-	uint64_t	xsvc_mem_addr_lo;
-	uint64_t	xsvc_mem_addr_hi;
-	uint64_t	xsvc_mem_align;
-	int		xsvc_mem_sgllen;
-	size_t		xsvc_mem_size;
-	void		*xsvc_sg_list;
-} xsvc_mem_req;
-typedef struct _xsvc_mloc {
-	uint64_t	mloc_addr;
-	size_t		mloc_size;
-} xsvc_mloc;
-#else
-typedef struct _xsvc_mem_req {
-	uint64_t	xsvc_mem_reqid;
-	uint64_t	xsvc_mem_addr_lo;
-	uint64_t	xsvc_mem_addr_hi;
-	uint64_t	xsvc_mem_align;
-	int		xsvc_mem_sgllen;
-	uint32_t	xsvc_mem_size;
-	uint32_t	xsvc_sg_list;
-} __attribute__((packed)) xsvc_mem_req;
-typedef struct _xsvc_mloc32 {
-	uint64_t	mloc_addr;
-	size_t		mloc_size;
-} xsvc_mloc;
-#endif
-#endif
-
 using namespace std;
 
 namespace rbu
@@ -105,9 +68,6 @@ const int RBU_PACKET_SIZE = 4096;
 
     driver_type getDriverType()
     {
-#ifdef sun
-	return rbu_solaris;
-#else
         if (!access(rbu_v1_mono_data_file, F_OK))
             return rbu_linux_v1;
         else if (!access(rbu_v2_img_type_file, F_OK))
@@ -116,7 +76,6 @@ const int RBU_PACKET_SIZE = 4096;
             return rbu_linux_v0;
         else
             return rbu_unsupported;
-#endif
     }
 
     static FILE * writePacket(const char *fn, const char *buffer, size_t bufSize, bool openclose)
@@ -398,50 +357,7 @@ const int RBU_PACKET_SIZE = 4096;
         setLoadValue('0');
     }
 
-#ifdef sun
-    static void doSolarisUpdate(FILE *hdr_fh, int pt) 
-    {
-	xsvc_mem_req mrq = { 0 };
-	xsvc_mloc ml;	
-	size_t totalBytes;
-	void *ptr;
-	int fd, pgsize;
 
-	pgsize = getpagesize();
-	fseek(hdr_fh, 0, SEEK_END);
-	totalBytes = ftell(hdr_fh);
-
-	totalBytes = (totalBytes + 4095) & ~4095;
-	fd = open("/dev/xsvc", O_RDWR);
-	if (fd < 0) 
-	{
-		cout << "failed to open xsvc" << endl;
-		return;
-	}
-	/* Allocate a chunk of physical memory < 4Gb */
-     	mrq.xsvc_mem_reqid = 0xDE11B105; 
-	mrq.xsvc_mem_size = totalBytes;
-	mrq.xsvc_mem_addr_lo = 0;
-	mrq.xsvc_mem_addr_hi = 0xFFFFFFFFL;
-	mrq.xsvc_mem_sgllen = 1;
-	mrq.xsvc_mem_align = 4096;
-  	mrq.xsvc_sg_list = (intptr_t)&ml;
-	if (ioctl(fd, XSVC_ALLOC_MEM, &mrq) < 0)
-	{
-		cout << "xsvc ioctl fails" << endl;
-		return;
-	}
-
-	/* mmap physical memory and read BIOS header into buffer */
-	ptr = mmap(0, totalBytes, PROT_WRITE, MAP_SHARED, fd, ml.mloc_addr);
-	if (ptr == (void *)-1LL) {
-		cout << "mmap fails" << endl;
-		return;
-	}
-	fseek(hdr_fh, 0, SEEK_SET);
-	fread(ptr, 1, totalBytes, hdr_fh);
-    }
-#endif
 
 /*****************************************************************************
 ******************************************************************************
@@ -545,13 +461,6 @@ main entry points for this module.
                 break;
             }
         }
-#ifdef sun
-	else if (dt == rbu_solaris)
-	{
-            cout << "Using RBU Solaris driver. Initializing Driver. " << endl;
-	    doSolarisUpdate(hdr_fh, supported_pt);
-	}
-#endif
         else
         {
             throw RbuNotSupportedImpl("Could not open Dell RBU driver.");

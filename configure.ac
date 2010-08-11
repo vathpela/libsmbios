@@ -180,6 +180,7 @@ case $host_os in
 		;;
 	solaris*)
 		solaris_os=1
+		AC_SEARCH_LIBS([nanosleep],[rt])
 		;;
 	mingw32*)
 		windows_os=1

@@ -186,10 +186,6 @@ FILE *open_request_file()
     strcat(fn, smi_request_fn);
     fnprintf("open request file: '%s'\n", fn);
     fd = fopen(fn, "wb");
-#ifndef sun
-    if(fd)
-        flock( fileno(fd), LOCK_EX );
-#endif
     if(fd)
         ret = fwrite("0", 1, 1, fd);
 
@@ -235,7 +231,7 @@ void copy_phys_bufs(struct dell_smi_obj *this, struct callintf_cmd *kernel_buf, 
 }
 
 
-int __internal LINUX_dell_smi_obj_execute(struct dell_smi_obj *this)
+int __internal Solaris_dell_smi_obj_execute(struct dell_smi_obj *this)
 {
     struct callintf_cmd *kernel_buf;
     size_t alloc_size = sizeof(struct callintf_cmd) + sizeof(this->smi_buf);
@@ -290,9 +286,6 @@ int __internal LINUX_dell_smi_obj_execute(struct dell_smi_obj *this)
     get_smi_results(buffer, alloc_size);
 
     // unlock
-#ifndef sun
-    flock( fileno(fd), LOCK_UN );
-#endif
 
     // update our physical address bufs
     memcpy(&(this->smi_buf), kernel_buf->command_buffer_start, sizeof(this->smi_buf));
@@ -319,6 +312,6 @@ out:
 
 int __internal init_dell_smi_obj(struct dell_smi_obj *this)
 {
-    this->execute = LINUX_dell_smi_obj_execute;
+    this->execute = Solaris_dell_smi_obj_execute;
     return init_dell_smi_obj_std(this);
 }

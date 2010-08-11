@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <string.h>     // memcpy
 #include <errno.h>
-#include <unistd.h>
 #include <sys/mman.h>   // mmap
 
 #include "smbios_c/obj/memory.h"
@@ -304,11 +303,7 @@ out:
 
 __internal int init_mem_struct(struct memory_access_obj *m)
 {
-#ifdef sun
-   return init_mem_struct_filename(m, "/dev/xsvc");
-#else
    return init_mem_struct_filename(m, "/dev/mem");
-#endif
 }
 
 
