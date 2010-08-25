@@ -18,8 +18,8 @@ lib_LTLIBRARIES=
 TESTS=
 
 AM_CPPFLAGS = -I$(top_builddir)/out/include -I$(top_srcdir)/src/include -DLIBSMBIOS_LOCALEDIR=\"$(localedir)\"
-AM_CFLAGS = -Werror -Wall
-AM_CXXFLAGS = -Werror -Wall
+#AM_CFLAGS = -Werror -Wall
+#AM_CXXFLAGS = -Werror -Wall
 AM_LDADD = $(LIBINTL)
 
 if BUILD_LINUX
@@ -27,6 +27,8 @@ AM_LDFLAGS = -L$(top_builddir)/out/ -Wl,--no-undefined @LDFLAG_AS_NEEDED@
 endif
 
 if BUILD_SOLARIS
+#AM_CFLAGS = -v
+#AM_CXXFLAGS = -v
 AM_LDFLAGS = -L$(top_builddir)/out/
 endif
 

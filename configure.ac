@@ -114,6 +114,8 @@ if test "$wantasneeded" = "yes"; then
     LDFLAG_NO_AS_NEEDED="-Wl,-no-as-needed"
 fi
 
+AC_CHECK_DECLS([__SUNPRO_C, __SUNPRO_CC], [SUNCC="yes"], [SUNCC="no"])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_C99
