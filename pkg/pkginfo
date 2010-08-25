@@ -1,6 +1,6 @@
 PKG="DELLbios"
 NAME="Dell BIOS update utility"
-VERSION="2.2.16"
+VERSION="2.2.16-sunlib"
 ARCH="x86"
 CLASSES="none"
 CATEGORY="utility"

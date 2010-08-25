@@ -49,6 +49,10 @@
 
 using namespace std;
 
+#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+#define __asm__ asm
+#endif
+
 struct options opts[] =
     {
         { 1, "info", "Display Media Direct Info", "i", 0 },

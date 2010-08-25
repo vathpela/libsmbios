@@ -21,6 +21,10 @@
 #include "smbios/compat.h"
 
 #include <sys/sysi86.h>
+#if defined __SUNPRO_C || defined __SUNPRO_CC
+#define __asm__ asm
+#endif
+
 void outb_p(int data, int port)
 {
 	__asm__ __volatile__("outb %b0,%w1" : : "a" (data), "Nd" (port));

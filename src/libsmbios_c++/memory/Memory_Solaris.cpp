@@ -68,7 +68,7 @@ namespace memory
     {
         if(data->lastMapping)
         {
-            munmap(data->lastMapping, data->mappingSize);
+            munmap((char *)data->lastMapping, data->mappingSize);
             data->lastMapping = 0;
         }
         if (data->fd)
@@ -131,7 +131,7 @@ namespace memory
             {
                 data->lastMappedOffset = offset-mmoff;
                 if (data->lastMapping)
-                    munmap(data->lastMapping, data->mappingSize);
+                    munmap((char *)data->lastMapping, data->mappingSize);
                 data->lastMapping = mmap( 0, data->mappingSize, PROT_READ, MAP_SHARED, fileno(data->fd), offset-mmoff);
                 if ((data->lastMapping) == reinterpret_cast<void *>(-1))
                     throw AccessErrorImpl(_("mmap failed."));
