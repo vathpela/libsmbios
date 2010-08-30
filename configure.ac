@@ -212,4 +212,5 @@ AC_CONFIG_FILES([libsmbios_c++-uninstalled.pc:pkg/libsmbios_c++-uninstalled.pc.i
 AC_CONFIG_FILES([pkg/libsmbios_c++.pc])
 AC_CONFIG_FILES([out/public-include/smbios/dlopen.h:pkg/dlopen.h.in])
 AC_CONFIG_FILES([out/public-include/smbios_c/dlopen.h:pkg/dlopen.h.in])
+AC_CONFIG_FILES([pkg/pkginfo])
 AC_OUTPUT

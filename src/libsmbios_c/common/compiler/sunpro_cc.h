@@ -1,6 +1,7 @@
 #define UNREFERENCED_PARAMETER(P)  (void)(P)
 
-#define __internal __hidden
+#define __internal
+#define __hidden
 
 #ifndef DEBUG_MODULE_NAME
 #  define DEBUG_MODULE_NAME "DEBUG_OUTPUT_ALL"
