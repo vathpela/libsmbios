@@ -9,7 +9,7 @@
  * it under the terms of the GNU General Public License as published
  * by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- 
+
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -82,11 +82,11 @@ namespace rbu
 	return rbu_solaris;
     }
 
-       
-    static void doSolarisUpdate(FILE *hdr_fh, int pt) 
+
+    static void doSolarisUpdate(FILE *hdr_fh, int pt)
     {
 	xsvc_mem_req mrq = { 0 };
-	xsvc_mloc ml;	
+	xsvc_mloc ml;
 	size_t totalBytes;
 	void *ptr;
 	int fd, pgsize;
@@ -97,13 +97,13 @@ namespace rbu
 
 	totalBytes = (totalBytes + 4095) & ~4095;
 	fd = open("/dev/xsvc", O_RDWR);
-	if (fd < 0) 
+	if (fd < 0)
 	{
 		cout << "failed to open xsvc" << endl;
 		return;
 	}
 	/* Allocate a chunk of physical memory < 4Gb */
-     	mrq.xsvc_mem_reqid = 0xDE11B105; 
+     	mrq.xsvc_mem_reqid = 0xDE11B105;
 	mrq.xsvc_mem_size = totalBytes;
 	mrq.xsvc_mem_addr_lo = 0;
 	mrq.xsvc_mem_addr_hi = 0xFFFFFFFFL;
@@ -133,14 +133,14 @@ main entry points for this module.
 
 ******************************************************************************
 *****************************************************************************/
-    
+
     void dellBiosUpdate(const IRbuHdr &hdr, packet_type force_type)
     {
         FILE *hdr_fh = hdr.getFh();
         fseek(hdr_fh, 0, 0);
 
         bool forced=false;
-        
+
         // TODO: verify that it is a HDR file
         // TODO: checksum HDR file
 
@@ -149,13 +149,13 @@ main entry points for this module.
             << (supported_pt == pt_packet ? ", PACKET"   : "")
             << ")"
             << endl;
-    
+
         if( force_type != pt_any )
         {
             supported_pt = force_type;
             forced = true;
         }
-    
+
         driver_type dt = getDriverType();
 
 	if (dt == rbu_solaris)
@@ -167,13 +167,13 @@ main entry points for this module.
         {
             throw RbuNotSupportedImpl("Could not open Dell RBU driver.");
         }
-    
+
         cout << "Activate CMOS bit to notify BIOS that update is ready on next boot." << endl;
         activateRbuToken();
-    
+
         cout << "Update staged sucessfully. BIOS update will occur on next reboot." << endl;
     }
-    
+
     void cancelDellBiosUpdate()
     {
         // FOR LOAD CANCEL:

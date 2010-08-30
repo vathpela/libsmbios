@@ -9,7 +9,7 @@
  * it under the terms of the GNU General Public License as published
  * by the Free Software Foundation; either version 2 of the License,
  * or (at your option) any later version.
- 
+
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -49,7 +49,7 @@ namespace smi
 
     static size_t FWRITE(const void *ptr, size_t size, size_t nmemb, FILE *stream)
     {
-        size_t written = fwrite(ptr, size, nmemb, stream); 
+        size_t written = fwrite(ptr, size, nmemb, stream);
         // TODO: handle short write
         if (written < nmemb)
             throw smbios::InternalErrorImpl("Short write to file handle");

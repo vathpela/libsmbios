@@ -89,9 +89,9 @@ namespace cmos
         if(! isNotifySuppressed() )
         {
             // writers are responsible for only writing changed values
-            // otherwise we get to see how fast Linux can do an 
+            // otherwise we get to see how fast Linux can do an
             // infinite loop. :-)
-            notify(); 
+            notify();
         }
     }
 
