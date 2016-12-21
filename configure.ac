@@ -52,6 +52,7 @@ AC_GNU_SOURCE
 AC_CONFIG_SRCDIR([src/])
 AC_CONFIG_HEADER([out/include/config.h:pkg/config.h.in])
 
+AM_SILENT_RULES([yes])
 # Version variables
 AC_SUBST([RELEASE_MAJOR], [release_major_version()])
 AC_SUBST([RELEASE_MINOR], [release_minor_version()])
