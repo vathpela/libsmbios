@@ -60,7 +60,7 @@ run_test() {
     fi
     rm -rf $TMPDIR/*
     if [ -n "$source_dir" ]; then
-        cp $source_dir/* $target_dir/ ||:
+        cp -r $source_dir/* $target_dir/ ||:
         reconstruct_memdump $target_dir $target_dir
     fi
     $VALGRIND $DIR/$test_binary $TMPDIR $(basename "$source_dir")
