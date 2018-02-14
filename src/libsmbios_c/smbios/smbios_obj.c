@@ -412,7 +412,7 @@ bool __hidden smbios_verify_smbios(const char *buf, long length, long *dmi_lengt
     bool retval = true;
 
     u8 checksum = 0;
-    for(unsigned int i = 0; i < length ; ++i )
+    for(long i = 0; i < length ; ++i )
         checksum = (checksum + buf[i]) & 0xFF;
 
     fnprintf("SMBIOS TEP csum %d.\n", (int)checksum);
@@ -433,7 +433,7 @@ bool __hidden smbios_verify_smbios3(const char *buf, long length, long *dmi_leng
 {
     struct smbios_table_entry_point_64 *ep;
     u8 checksum = 0;
-    for(unsigned int i = 0; i < length ; ++i )
+    for(long i = 0; i < length ; ++i )
         checksum = (checksum + buf[i]) & 0xFF;
 
     fnprintf("SMBIOS TEP csum %d.\n", (int)checksum);
